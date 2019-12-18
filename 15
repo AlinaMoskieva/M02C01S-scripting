@@ -1,0 +1,125 @@
+#!/bin/bash
+
+prepare_game_field(){
+    game_field=()
+    control_cell_index=0
+    for i in {1..15}
+    do
+        j=$(( RANDOM % 16 ))
+        while [[ ${game_field[j]} != "" ]]
+        do
+            j=$(( RANDOM % 16 ))
+        done
+
+        if [[ $i -le 9 ]]
+          then game_field[j]="0$i"
+        else
+          game_field[j]=$i
+        fi
+    done
+
+    for i in {0..15}
+    do
+        if [[ ${game_field[i]} == "" ]]
+          then control_cell_index=$i
+          game_field[control_cell_index]="00"
+        fi
+    done
+
+    print_field
+}
+
+print_field(){
+    clear
+    D="-----------------"
+    S="%s\n|%3s|%3s|%3s|%3s|\n"
+    printf $S $D ${game_field[0]} ${game_field[1]} ${game_field[2]} ${game_field[3]}
+    printf $S $D ${game_field[4]} ${game_field[5]} ${game_field[6]} ${game_field[7]}
+    printf $S $D ${game_field[8]} ${game_field[9]} ${game_field[10]} ${game_field[11]}
+    printf $S $D ${game_field[12]} ${game_field[13]} ${game_field[14]} ${game_field[15]}
+    echo $D
+}
+
+print_instruction(){
+  echo "Press U for up the control elem"
+  echo "Press D for right the control elem"
+  echo "Press R for down the control elem"
+  echo "Press L for left the control elem"
+  echo ""
+}
+
+
+exchange(){
+    game_field[$control_cell_index]=${game_field[$1]}
+    game_field[$1]="00"
+    control_cell_index=$1
+}
+
+check_for_win(){
+    for i in {0..8}
+    do
+        if [[ "${game_field[i]}" != "0$(( $i + 1 ))" ]]
+        then
+            return
+        fi
+    done
+
+    for i in {9..14}
+    do
+        if [[ "${game_field[i]}" != "$(( $i + 1 ))" ]]
+        then
+            return
+        fi
+    done
+
+    echo "Congrats!"
+    exit
+}
+
+start_game(){
+while true
+do
+    print_instruction
+
+    read -n 1 -p "Press q for quit" user_move
+
+    case $user_move in
+        u)
+            if [[ $control_cell_index -gt 3 ]]
+              then exchange $(( $control_cell_index - 4 ))
+            fi
+        ;;
+        d)
+            index=$(( $control_cell_index % 4 ))
+
+            if [[ $index -gt 0 ]]
+              then exchange $(( $control_cell_index - 1 ))
+            fi
+        ;;
+        r)
+            if [[ $control_cell_index -lt 12 ]]
+              then exchange $(( $control_cell_index + 4 ))
+            fi
+        ;;
+        l)
+            index=$(( $control_cell_index % 4 ))
+
+            if [[ $index -lt 3 ]]
+              then exchange $(( $control_cell_index + 1 ))
+            fi
+        ;;
+        q)
+             exit
+        ;;
+    esac
+
+    print_field
+    check_for_win
+done
+}
+
+prepare_game_field
+
+echo -en "\033[37;1;46m Second task: 15 \033[0m\n\n"
+
+start_game
