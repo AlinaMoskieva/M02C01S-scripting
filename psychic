@@ -1,0 +1,39 @@
+#!/bin/bash
+
+echo -en "\033[37;1;46m First task: Psychic \033[0m\n\n"
+echo "Hi, $USER!"
+
+user_answers_count=0
+numbers_history=""
+guessed_numbers_count=0
+
+while true
+do
+  read -p "What number from 0 to 9 is made up now (q - quite)? " answer
+
+  current_number=$((RANDOM % 9))
+  numbers_history="${numbers_history}${current_number} "
+
+  if [ $answer = "q" ]
+    then break
+  fi
+
+  while [[ "$answer" -gt 9 || "$answer" -le -1 ]];
+  do
+    read -p "The answer should be more than -1 and less than 10. Please try one more time: " answer
+  done
+
+  user_answers_count=$(( $user_answers_count + 1 ))
+
+  if [ $answer -eq $current_number ];
+  then
+      echo "Guessed!";
+      guessed_numbers_count=$(( $guessed_numbers_count + 1 ))
+  fi
+
+  guessed_persentage=$(( $guessed_numbers_count * 100 / $user_answers_count))
+  not_guessed_persentage=$(( ($user_answers_count - $guessed_numbers_count) * 100 / $user_answers_count))
+
+  echo "Statistic: (guessed/not guessed): $guessed_persentage% / $not_guessed_persentage%"
+  echo "Previous numbers: $numbers_history"
+done
